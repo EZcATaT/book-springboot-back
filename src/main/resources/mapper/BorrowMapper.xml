@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.book.mapper.BorrowMapper">
+
+    <sql id="borrowColumns">
+        b.id,
+        b.user_id,
+        b.book_id,
+        b.borrow_time,
+        b.return_time,
+        u.name as user_name,
+        k.book_name as book_name
+    </sql>
+
+    <select id="selectAll" resultType="com.book.entity.Borrow">
+        select <include refid="borrowColumns"/>
+        from borrow b
+        left join `user` u on u.id = b.user_id
+        left join book k on k.id = b.book_id
+        order by b.id desc
+    </select>
+
+    <select id="selectByUserId" resultType="com.book.entity.Borrow">
+        select <include refid="borrowColumns"/>
+        from borrow b
+        left join `user` u on u.id = b.user_id
+        left join book k on k.id = b.book_id
+        where b.user_id = #{userId}
+        order by b.id desc
+    </select>
+
+    <select id="selectById" resultType="com.book.entity.Borrow">
+        select <include refid="borrowColumns"/>
+        from borrow b
+        left join `user` u on u.id = b.user_id
+        left join book k on k.id = b.book_id
+        where b.id = #{id}
+    </select>
+
+    <select id="selectActiveByUserAndBook" resultType="com.book.entity.Borrow">
+        select id, user_id, book_id, borrow_time, return_time
+        from borrow
+        where user_id = #{userId}
+          and book_id = #{bookId}
+          and return_time is null
+        limit 1
+    </select>
+
+    <select id="countByUserId" resultType="int">
+        select count(*) from borrow where user_id = #{userId}
+    </select>
+
+    <select id="countByBookId" resultType="int">
+        select count(*) from borrow where book_id = #{bookId}
+    </select>
+
+    <insert id="insert" useGeneratedKeys="true" keyProperty="id">
+        insert into borrow (user_id, book_id, borrow_time, return_time)
+        values (#{userId}, #{bookId}, #{borrowTime}, #{returnTime})
+    </insert>
+
+    <update id="updateReturnTime">
+        update borrow
+        set return_time = #{returnTime}
+        where id = #{id}
+    </update>
+
+    <delete id="deleteById">
+        delete from borrow where id = #{id}
+    </delete>
+</mapper>
